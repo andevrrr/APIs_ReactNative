@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button, TextInput, Linking } from 'react-native';
 import * as Location from 'expo-location';
+import * as Battery from 'expo-battery';
 
 const App = () => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [batteryLevel, setBatteryLevel] = useState(null);
 
   useEffect(() => {
     requestLocationPermission();
+    subscribeToBatteryLevel();
+    getBatteryLevel();
   }, []);
 
   const requestLocationPermission = async () => {
@@ -50,6 +54,21 @@ const App = () => {
     }
   };
 
+  const subscribeToBatteryLevel = () => {
+    Battery.addBatteryLevelListener(({ batteryLevel }) => {
+      setBatteryLevel(batteryLevel * 100);
+    });
+  };
+
+  const getBatteryLevel = async () => {
+    try {
+      const batteryInfo = await Battery.getBatteryLevelAsync();
+      setBatteryLevel(batteryInfo * 100);
+    } catch (error) {
+      console.error('Error getting battery level:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.section}>
@@ -69,6 +88,10 @@ const App = () => {
           style={styles.input}
         />
         <Button title="Make Phone Call" onPress={makePhoneCall} />
+      </View>
+
+      <View style={styles.section}>
+        <Text>Battery Level: {batteryLevel !== null ? `${batteryLevel.toFixed(2)}%` : 'Loading...'}</Text>
       </View>
     </View>
   );
