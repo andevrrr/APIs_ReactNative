@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button, TextInput, Linking } from 'react-native';
 import * as Location from 'expo-location';
 
 const App = () => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
     requestLocationPermission();
@@ -34,10 +35,41 @@ const App = () => {
     }
   };
 
+  const openMaps = () => {
+    const { latitude, longitude } = location;
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    Linking.openURL(url);
+  };
+
+  const makePhoneCall = () => {
+    if (phoneNumber) {
+      const telUrl = `tel:${phoneNumber}`;
+      Linking.openURL(telUrl);
+    } else {
+      console.log('Please enter a valid phone number');
+    }
+  };
+
   return (
-    <View style={styles.section}>
-      <Text>Latitude: {location.latitude}</Text>
-      <Text>Longitude: {location.longitude}</Text>
+    <View style={styles.container}>
+      <View style={styles.section}>
+        <Text>Latitude: {location.latitude}</Text>
+        <Text>Longitude: {location.longitude}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Button title="Open Maps" onPress={openMaps} />
+      </View>
+
+      <View style={styles.section}>
+        <TextInput
+          placeholder="Enter phone number"
+          keyboardType="phone-pad"
+          onChangeText={(text) => setPhoneNumber(text)}
+          style={styles.input}
+        />
+        <Button title="Make Phone Call" onPress={makePhoneCall} />
+      </View>
     </View>
   );
 };
@@ -45,13 +77,22 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
+    flexDirection: 'column',
+    padding: 16,
   },
   section: {
-    justifyContent: "center",
-    alignItems: "center",
-    flex: 60,
-  }
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 20,
+    marginVertical: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 8,
+    marginBottom: 8,
+  },
 });
 
 export default App;
